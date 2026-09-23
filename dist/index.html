@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060f" />
+  <title>Echo Courier — The City Remembers Every Sound</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%2328e7ff' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23ff2ea6' stroke-width='1.5' opacity='0.6'/%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%2328e7ff' stroke-width='1' opacity='0.3'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script type="module" crossorigin src="./assets/index-CaO45Fm9.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CouWYu4B.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- HUD -->
+    <div id="hud" class="hidden">
+      <div id="hud-mission" class="hud-panel">
+        <div id="hud-level" class="hud-label">LEVEL 01</div>
+        <div id="hud-mission-name" class="hud-mission-title">FIRST DELIVERY</div>
+        <div class="hud-label" style="margin-top:8px">OBJECTIVES</div>
+        <div id="hud-objectives" class="hud-objectives"></div>
+      </div>
+
+      <div id="hud-network" class="hud-panel">
+        <div class="hud-label">NETWORK RESTORED</div>
+        <div id="network-percent" class="network-percent">0%</div>
+        <div class="network-bar"><div id="network-fill"></div></div>
+      </div>
+
+      <div id="boss-bar" class="hidden">
+        <div id="boss-name">THE SIGNAL WARDEN</div>
+        <div class="boss-bar-track"><div id="boss-fill"></div></div>
+      </div>
+
+      <div id="hud-energy" class="hud-panel">
+        <div class="hud-label">HULL INTEGRITY</div>
+        <div class="energy-bar hp-bar"><div id="hp-fill"></div></div>
+        <div class="hud-label" style="margin-top:6px">ECHO ENERGY</div>
+        <div class="energy-bar">
+          <div id="energy-fill"></div>
+          <div id="energy-cooldown"></div>
+        </div>
+        <div class="energy-row">
+          <span id="energy-text">100 / 100</span>
+          <span id="capsule-indicator" class="capsule-indicator empty">◈ NO CAPSULE</span>
+        </div>
+      </div>
+
+      <div id="hud-controls" class="hud-panel">
+        <div class="hud-label">CONTROLS</div>
+        <div class="controls-grid">
+          <span>WASD</span><span>Move</span>
+          <span>SHIFT</span><span>Boost</span>
+          <span>SPACE / E</span><span>Echo Pulse</span>
+          <span>ESC</span><span>Pause</span>
+        </div>
+      </div>
+
+      <div id="prompt" class="hidden"></div>
+      <div id="toast" class="hidden"></div>
+
+      <button id="mute-btn" class="icon-btn" title="Mute (M)">♪</button>
+    </div>
+
+    <!-- Mobile controls -->
+    <div id="mobile-controls" class="hidden">
+      <div id="joystick-zone"><div id="joystick-base"><div id="joystick-stick"></div></div></div>
+      <div id="mobile-buttons">
+        <button id="btn-laser" class="mobile-btn laser">LASER</button>
+        <button id="btn-pulse" class="mobile-btn pulse">PULSE</button>
+        <button id="btn-boost" class="mobile-btn boost">BOOST</button>
+      </div>
+    </div>
+
+    <!-- Title screen -->
+    <div id="screen-title" class="screen">
+      <div class="title-block">
+        <div class="title-echo"></div>
+        <h1 class="game-title">ECHO<span>COURIER</span></h1>
+        <p class="game-subtitle">THE CITY REMEMBERS EVERY SOUND.</p>
+        <p class="title-desc">The network is failing. Ride the neon streets, send your Echo Pulse into the dark, and deliver energy to the silent Signal Towers before the city goes quiet forever.</p>
+        <button id="btn-newgame" class="menu-btn primary">NEW GAME</button>
+        <button id="btn-continue" class="menu-btn hidden">CONTINUE</button>
+        <button id="btn-levels" class="menu-btn">LEVEL SELECT</button>
+        <button id="btn-settings" class="menu-btn">AUDIO: ON</button>
+        <div class="title-hint">WASD move · SHIFT boost · SPACE echo pulse</div>
+      </div>
+    </div>
+
+    <!-- Pause screen -->
+    <div id="screen-pause" class="screen hidden">
+      <div class="menu-block">
+        <h2 class="menu-title">PAUSED</h2>
+        <button id="btn-resume" class="menu-btn primary">RESUME</button>
+        <button id="btn-audio" class="menu-btn">AUDIO: ON</button>
+        <button id="btn-quit" class="menu-btn">RETURN TO TITLE</button>
+      </div>
+    </div>
+
+    <!-- Level select screen -->
+    <div id="screen-levels" class="screen hidden">
+      <div class="menu-block wide">
+        <h2 class="menu-title">LEVEL SELECT</h2>
+        <div id="level-grid" class="level-grid"></div>
+        <button id="btn-levels-back" class="menu-btn">BACK</button>
+      </div>
+    </div>
+
+    <!-- Level complete screen -->
+    <div id="screen-levelcomplete" class="screen hidden">
+      <div class="menu-block">
+        <h2 class="menu-title complete-title">LEVEL COMPLETE</h2>
+        <div id="lc-level" class="complete-sub">LEVEL 01 — FIRST DELIVERY</div>
+        <div id="lc-objectives" class="lc-objectives"></div>
+        <p id="lc-rewards" class="complete-stats"></p>
+        <button id="btn-lc-continue" class="menu-btn primary">CONTINUE</button>
+        <button id="btn-lc-levels" class="menu-btn">LEVEL SELECT</button>
+        <button id="btn-lc-title" class="menu-btn">RETURN TO TITLE</button>
+      </div>
+    </div>
+
+    <!-- Completion screen -->
+    <div id="screen-complete" class="screen hidden">
+      <div class="menu-block">
+        <div class="complete-ring"></div>
+        <h2 class="menu-title complete-title">NETWORK RESTORED</h2>
+        <div class="complete-percent">100%</div>
+        <p class="complete-sub">THE CITY IS ONLINE AGAIN.</p>
+        <p id="complete-final" class="complete-sub" style="letter-spacing:0.2em">FINAL VILLAIN DEFEATED — 20 / 20 LEVELS COMPLETE</p>
+        <p id="complete-stats" class="complete-stats"></p>
+        <button id="btn-again" class="menu-btn primary">PLAY AGAIN</button>
+        <button id="btn-lc-continue2" class="menu-btn">LEVEL SELECT</button>
+        <button id="btn-title2" class="menu-btn">RETURN TO TITLE</button>
+      </div>
+    </div>
+
+    <div id="vignette"></div>
+    <div id="damage-vignette"></div>
+    <div id="fade-overlay"></div>
+    <div id="loading"><div class="loading-text">TUNING FREQUENCIES…</div></div>
+  </div>
+</body>
+</html>
